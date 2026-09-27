@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Pantry & Recipe Concierge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined">
+<style>
+  :root {
+    --primary: #059669;
+    --primary-hover: #047857;
+    --primary-light: #ecfdf5;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --user-bubble: #059669;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+  }
+  .header-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .header-icon {
+    font-size: 1.8rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.3rem 0.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header-title h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 0.8rem;
+    opacity: 0.85;
+    font-weight: 400;
+    display: block;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.18);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    font-weight: 500;
+  }
+  .status-badge .dot {
+    width: 8px;
+    height: 8px;
+    background: #34d399;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #34d399;
+  }
+  .header-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: background 0.2s ease;
+  }
+  .header-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Category Action Bar */
+  .category-bar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    z-index: 9;
+  }
+  .category-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+  }
+  .category-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  #chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #log {
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .msg {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    animation: fadeIn 0.25s ease-out;
+  }
+  .msg.user {
+    flex-direction: row-reverse;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: #e2e8f0;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .msg.user .avatar {
+    background: #dbeafe;
+  }
+  .msg.agent .avatar {
+    background: var(--primary-light);
+    border: 1px solid #a7f3d0;
+  }
+  .bubble {
+    padding: 0.85rem 1.1rem;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    max-width: 80%;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+  }
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    border: none;
+  }
+  .msg.agent .bubble {
+    border-radius: 16px 16px 16px 4px;
+  }
+  .bubble.rich {
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: 100%;
+    white-space: normal;
+    box-shadow: none;
+  }
+
+  /* Copy Button & Footer */
+  .bubble-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid #f1f5f9;
+  }
+  .copy-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .copy-btn:hover {
+    background: #e2e8f0;
+    color: var(--primary);
+  }
+
+  /* Loading indicator */
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+  }
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
+  /* Footer & Input */
+  .footer-area {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem 1rem 1rem;
+  }
+  .prompts-container {
+    margin-bottom: 0.6rem;
+  }
+  .prompts-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+  .prompts-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+  }
+  .prompt-pill {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.825rem;
+    color: #334155;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .prompt-pill:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+  form {
+    display: flex;
+    gap: 0.6rem;
+    background: #fff;
+    padding: 0.6rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    font-size: 0.95rem;
+    outline: none;
+    color: var(--text-main);
+    background: transparent;
+  }
+  input::placeholder {
+    color: #94a3b8;
+  }
+  button#send-btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  button#send-btn:hover {
+    background: var(--primary-hover);
+  }
+  button#send-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* --- A2UI component styles --- */
+  .a2card { border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem; background: #fff; box-shadow: var(--shadow-sm); max-width: 100%; }
+  .a2card + .a2card, .a2col > .a2card { margin-top: 0.6rem; }
+  .a2col { display: flex; flex-direction: column; gap: 0.5rem; }
+  .a2row { display: flex; flex-direction: row; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .a2row.between { justify-content: space-between; }
+  .a2text { margin: 0; line-height: 1.45; }
+  .a2text.a2-h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+  .a2text.a2-h2 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+  .a2text.a2-h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+  .a2text.a2-h4 { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+  .a2text.a2-caption { font-size: 0.85rem; color: var(--text-muted); }
+  .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; width: 100%; }
+  .a2img { max-width: 100%; border-radius: 10px; display: block; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.2s ease; }
+  .a2img:hover { transform: scale(1.01); }
+  .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-size: 1.25rem; line-height: 1; vertical-align: middle; color: var(--primary); }
+
+  /* Lightbox Overlay */
+  #lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+  #lightbox.active {
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
+  }
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    object-fit: contain;
+  }
+  #lightbox .close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <div class="header-title">
+      <span class="header-icon">🍳</span>
+      <div>
+        <h1>Smart Pantry & Recipe Concierge</h1>
+        <span class="subtitle">AI Culinary Assistant & Inventory Manager</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-badge"><span class="dot"></span> Online</div>
+      <button class="header-btn" onclick="resetChat()">
+        <span class="material-symbols-outlined" style="font-size:1rem; color:#fff;">delete_sweep</span> Reset
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="category-bar">
+  <div class="category-content">
+    <button class="category-btn" onclick="sendPrompt('Show my current pantry inventory')">
+      <span>📦</span> My Pantry
+    </button>
+    <button class="category-btn" onclick="sendPrompt('Show my saved favorite recipes')">
+      <span>⭐</span> Saved Favorites
+    </button>
+    <button class="category-btn" onclick="sendPrompt('Search for Indian recipes')">
+      <span>🔍</span> Search Recipes
+    </button>
+    <button class="category-btn" onclick="sendPrompt('Generate a dish image for Garlic Butter Pasta')">
+      <span>🖼️</span> Dish Image
+    </button>
+    <button class="category-btn" onclick="sendPrompt('Scale Garlic Butter Pasta for 4 people and calculate macros')">
+      <span>📊</span> Scale & Macros
+    </button>
+  </div>
+</div>
+
+<main id="chat-container">
+  <div id="log">
+    <div class="msg agent">
+      <div class="avatar">🧑‍🍳</div>
+      <div class="bubble">Welcome! I am your <strong>Smart Pantry & Recipe Concierge</strong>. I can help you create meals from ingredients on hand, manage your pantry inventory, scale recipes, calculate macros, and generate dish image previews.</div>
+    </div>
+  </div>
+</main>
+
+<div class="footer-area">
+  <div class="prompts-container">
+    <span class="prompts-label">Suggested Prompts</span>
+    <div class="prompts-row">
+      <button type="button" class="prompt-pill" onclick="sendPrompt('What recipes can I make with my pantry ingredients?')">
+        <span>🥗</span> What recipes can I make with my pantry ingredients?
+      </button>
+      <button type="button" class="prompt-pill" onclick="sendPrompt('Add 500g Spaghetti, Garlic, and Olive Oil to my pantry')">
+        <span>📝</span> Add Spaghetti, Garlic & Olive Oil to pantry
+      </button>
+      <button type="button" class="prompt-pill" onclick="sendPrompt('Generate a dish image for Garlic Butter Pasta and scale it for 4 people')">
+        <span>🖼️</span> Generate dish image & scale for 4 people
+      </button>
+    </div>
+  </div>
+
+  <form id="form">
+    <input id="input" placeholder="Ask about recipes, pantry items, scaling, or dish images..." autocomplete="off" autofocus>
+    <button id="send-btn" type="submit">
+      <span>Send</span>
+      <span class="material-symbols-outlined" style="color:#fff; font-size:1.1rem;">send</span>
+    </button>
+  </form>
+</div>
+
+<!-- Image Lightbox Modal -->
+<div id="lightbox" onclick="closeLightbox(event)">
+  <span class="close-btn">&times;</span>
+  <img id="lightbox-img" src="" alt="Dish Preview">
+</div>
+
+<script>
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function bubble(who) {
+  const m = el("div", "msg " + who);
+  const avatar = el("div", "avatar", who === "user" ? "👤" : "🧑‍🍳");
+  const b = el("div", "bubble");
+  m.appendChild(avatar);
+  m.appendChild(b);
+  log.appendChild(m);
+  const container = document.getElementById("chat-container");
+  container.scrollTop = container.scrollHeight;
+  return b;
+}
+
+function sendPrompt(text) {
+  input.value = text;
+  form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+}
+
+function resetChat() {
+  log.innerHTML = `
+    <div class="msg agent">
+      <div class="avatar">🧑‍🍳</div>
+      <div class="bubble">Chat reset. How can I help you cook or manage your pantry today?</div>
+    </div>
+  `;
+}
+
+function openLightbox(src) {
+  lightboxImg.src = src;
+  lightbox.classList.add("active");
+}
+
+function closeLightbox(e) {
+  if (e.target === lightbox || e.target.classList.contains("close-btn")) {
+    lightbox.classList.remove("active");
+  }
+}
+
+// Global image click listener for lightbox
+document.addEventListener("click", (e) => {
+  if (e.target.tagName === "IMG" && e.target.closest("#log")) {
+    openLightbox(e.target.src);
+  }
+});
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:0.85rem;">check</span> Copied`;
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+}
+
+function showLoading(b) {
+  b.innerHTML = `
+    <div class="loading-indicator">
+      <span>🧑‍🍳 Concierge is thinking</span>
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+}
+
+function boundStr(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v.literalString === "string") return v.literalString;
+  return "";
+}
+
+function childIds(props) {
+  const ids = [];
+  if (props && typeof props.child === "string") ids.push(props.child);
+  const ch = props && props.children;
+  if (ch && Array.isArray(ch.explicitList)) for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+  return ids;
+}
+
+function iconName(n) { return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase(); }
+
+function buildNode(id, comps, seen) {
+  if (!id || seen.has(id)) return null;
+  seen.add(id);
+  const spec = comps[id];
+  if (!spec || typeof spec !== "object") return null;
+  const type = Object.keys(spec)[0];
+  const props = spec[type] || {};
+  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+  switch (type) {
+    case "Card": {
+      const d = el("div", "a2card"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Column":
+    case "List": {
+      const horizontal = type === "List" && props.direction === "horizontal";
+      const d = el("div", horizontal ? "a2row" : "a2col"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Row": {
+      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+      kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Text": {
+      const t = el("div", "a2text");
+      const hint = String(props.usageHint || "body").toLowerCase();
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
+      else if (hint === "caption") t.classList.add("a2-caption");
+      t.textContent = boundStr(props.text);
+      return t;
+    }
+    case "Divider":
+      return el("hr", "a2divider");
+    case "Image": {
+      const src = boundStr(props.url || props.src);
+      if (!/^https?:\/\//i.test(src)) return null;
+      const img = el("img", "a2img"); img.src = src; img.alt = boundStr(props.alt) || ""; return img;
+    }
+    case "Icon": {
+      const s = el("span", "material-symbols-outlined"); s.textContent = iconName(boundStr(props.name) || props.name); return s;
+    }
+    default:
+      return null;
+  }
+}
+
+function renderSurface(messages, container) {
+  const comps = {};
+  const roots = [];
+  for (const m of messages) {
+    if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.id && c.component) comps[c.id] = c.component;
+  }
+  let rootIds = roots.filter(r => comps[r]);
+  if (rootIds.length === 0) {
+    const referenced = new Set();
+    for (const id in comps) { const spec = comps[id]; childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c)); }
+    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+  }
+  let drew = false;
+  for (const rid of rootIds) { const node = buildNode(rid, comps, new Set()); if (node) { container.appendChild(node); drew = true; } }
+  return drew;
+}
+
+function flattenText(messages) {
+  const out = [];
+  for (const m of messages) {
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
+  }
+  return out.join("\n").trim();
+}
+
+function renderReply(b, parts) {
+  b.textContent = "";
+  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+  const textStr = texts.join("\n").trim();
+  if (textStr) {
+    const textNode = el("div", null, textStr);
+    b.appendChild(textNode);
+
+    // Add Copy button footer
+    const footer = el("div", "bubble-footer");
+    const copyBtn = el("button", "copy-btn");
+    copyBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:0.85rem;">content_copy</span> Copy`;
+    copyBtn.onclick = () => copyText(copyBtn, textStr);
+    footer.appendChild(copyBtn);
+    b.appendChild(footer);
+  }
+
+  if (a2ui.length) {
+    b.classList.add("rich");
+    if (!renderSurface(a2ui, b)) b.appendChild(el("div", null, flattenText(a2ui) || "(no card content)"));
+  }
+  if (!b.childNodes.length) b.textContent = "(no response)";
+  const container = document.getElementById("chat-container");
+  container.scrollTop = container.scrollHeight;
+}
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  bubble("user").textContent = text;
+  input.value = "";
+  const b = bubble("agent");
+  showLoading(b);
+  try {
+    const res = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text }) });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error(`Server returned non-JSON (HTTP ${res.status}). ${raw.slice(0, 300)}`); }
+    renderReply(b, data.parts || []);
+  } catch (e) {
+    b.textContent = "Error: " + e.message;
+  }
+});
+</script>
+</body>
+</html>
